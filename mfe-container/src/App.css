@@ -1,0 +1,56 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.shell-header {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 24px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.shell-logo {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-h);
+  margin-right: auto;
+}
+
+.shell-nav {
+  display: flex;
+  gap: 4px;
+
+  a {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: var(--text);
+    text-decoration: none;
+    transition: background 0.2s;
+
+    &:hover {
+      background: var(--accent-bg);
+      color: var(--text-h);
+    }
+
+    &.active {
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+  }
+}
+
+.shell-user {
+  font-size: 0.875rem;
+  color: var(--text);
+  margin-left: auto;
+}
+
+.shell-main {
+  flex: 1;
+}

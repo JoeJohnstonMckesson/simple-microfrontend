@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mfe-component",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/joe.johnston/Workspace/simple-mfe-example/mfe-component",
+      "port": 5173
+    },
+    {
+      "name": "mfe-component-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview"],
+      "cwd": "/Users/joe.johnston/Workspace/simple-mfe-example/mfe-component",
+      "port": 4173
+    },
+    {
+      "name": "mfe-container",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "5174"],
+      "cwd": "/Users/joe.johnston/Workspace/simple-mfe-example/mfe-container",
+      "port": 5174
+    }
+  ]
+}
