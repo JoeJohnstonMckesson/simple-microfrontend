@@ -95,7 +95,7 @@ For MFEs to play nicely inside a container, they need to expose a consistent int
 - **`update`** — Called to render or re-render the MFE. Also used to pass updated state down from the container.
 - **`unmount`** — Called when the user navigates away. Cleans up the MFE and prevents memory leaks.
 
-If you're using an established MFE framework (like [single-spa](https://single-spa.js.org/) or Webpack Module Federation), these will be handled for you. In our case, we're implementing them ourselves — which is simpler than it sounds.
+If you're using an established MFE framework (like [single-spa](https://single-spa.js.org/) or [Webpack Module Federation](https://webpack.js.org/concepts/module-federation/)), these will be handled for you. In our case, we're implementing them ourselves — which is simpler than it sounds.
 
 ---
 
