@@ -126,9 +126,9 @@ This is doing three things: finding a DOM node, creating a React root attached t
 
 ## Converting the MFE
 
-### Step 1: Enable the Vite Manifest
+### Step 1: Configure the Vite Build
 
-In your MFE's `vite.config.js`, enable the `manifest` option. This generates a `manifest.json` at build time that maps your source files to their hashed output filenames — the container will use this to find and import your MFE's entry point.
+In your MFE's `vite.config.js`, switch to `build.lib` mode and enable the manifest:
 
 ```javascript
 import { defineConfig } from "vite";
@@ -136,15 +136,24 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    "process.env.NODE_ENV": '"production"',
+  },
   build: {
-    manifest: true,
-    rollupOptions: {
-      // Make sure your entry point is explicitly set
-      input: "src/main.jsx",
+    lib: {
+      entry: "src/main.jsx",
+      formats: ["es"],
+      fileName: () => "main.js",
     },
+    manifest: true,
   },
 });
 ```
+
+Two things are happening here that aren't obvious:
+
+- **`build.lib` instead of `rollupOptions.input`:** Using `rollupOptions.input` alone produces an IIFE bundle — it executes immediately and exports nothing. `build.lib` with `formats: ['es']` is what produces a proper ES module with your `init`, `update`, and `unmount` exports intact.
+- **`define: { "process.env.NODE_ENV": '"production"' }`:** In lib mode, Vite doesn't automatically replace Node.js globals. React checks `process.env.NODE_ENV` at runtime, so without this the bundle will throw a `process is not defined` error in the browser.
 
 ### Step 2: Export the Lifecycle Functions
 
@@ -211,15 +220,24 @@ export function MFERenderer({ mfeManifestUrl, appState }) {
     if (mfeModule.current) return; // already initialized
 
     const loadMFE = async () => {
-      // 1. Fetch the manifest to find the hashed entry point filename
+      // 1. Fetch the manifest to find the entry point and stylesheets
       const manifestResponse = await fetch(mfeManifestUrl);
       const manifest = await manifestResponse.json();
+      const baseUrl = new URL(mfeManifestUrl).origin;
 
-      // 2. The manifest key matches your Vite entry point
-      const entryPath = manifest["src/main.jsx"].file;
+      // 2. Inject any stylesheets listed in the manifest
+      for (const entry of Object.values(manifest)) {
+        if (entry.file?.endsWith(".css")) {
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = `${baseUrl}/${entry.file}`;
+          document.head.appendChild(link);
+        }
+      }
 
       // 3. Dynamically import the MFE module
-      const mod = await import(/* @vite-ignore */ entryPath);
+      const entryUrl = `${baseUrl}/${manifest["src/main.jsx"].file}`;
+      const mod = await import(/* @vite-ignore */ entryUrl);
       mfeModule.current = mod;
 
       // 4. Initialize and render
@@ -244,7 +262,8 @@ export function MFERenderer({ mfeManifestUrl, appState }) {
 
 A few things happening here:
 
-- The first `useEffect` runs once on mount. It fetches the manifest, resolves the MFE's entry file path, dynamically imports the module, and calls `init` + `update`.
+- The first `useEffect` runs once on mount. It fetches the manifest, injects stylesheets, dynamically imports the JS module, and calls `init` + `update`.
+- **CSS injection:** The manifest lists every output file, including stylesheets. We iterate over them and inject a `<link>` tag for each `.css` file. Without this step, the MFE renders with no styles.
 - The second `useEffect` runs whenever `appState` changes, keeping the MFE in sync with the container.
 - The cleanup function in the first effect calls `unmount` when `MFERenderer` is removed from the DOM.
 
