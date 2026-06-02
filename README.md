@@ -1,53 +1,5 @@
 # How to Turn Any React App into a Micro-Frontend
 
-## Running the Example
-
-This repo contains two apps: `mfe-component` (the MFE) and `mfe-container` (the shell that loads it).
-
-### 1. Install dependencies
-
-```bash
-cd mfe-component && npm install
-cd ../mfe-container && npm install
-```
-
-### 2. Build and serve the MFE
-
-The container loads the MFE from its built output, so you need to build it first and run the preview server:
-
-```bash
-cd mfe-component
-npm run build
-npm run preview   # serves on http://localhost:4173
-```
-
-### 3. Start the container
-
-In a separate terminal:
-
-```bash
-cd mfe-container
-npm run dev   # serves on http://localhost:5174
-```
-
-Open [http://localhost:5174](http://localhost:5174). You should see the container shell with the MFE card grid loaded inside it.
-
-> **Rebuilding the MFE:** If you change the MFE's source, re-run `npm run build` in `mfe-component` and hard-refresh the container. The container always loads from the built output, not the dev server.
-
----
-
-You're a dev. You've been happily building and maintaining an app for months — maybe even years. Then one fateful day, someone from management shows up to your team's daily standup with an idea to "streamline the user experience" and "converge our verticals" with a "strategic realignment."
-
-Your eyes glaze over as the consultant wraps up. Your PM translates: "They've built a new customer portal, and they want to put our app in it."
-
-You panic. "This app wasn't built to be deployed that way!" you think. But then — the lightbulb moment.
-
-"We'll make it a micro-frontend."
-
-And luckily, React already has everything you need.
-
----
-
 ## What Is a Micro-Frontend (MFE)?
 
 A micro-frontend is an architectural pattern for integrating separate UI applications into one cohesive experience. It's the frontend equivalent of the microservices pattern on the backend — each piece of the UI is developed, deployed, and owned independently, then composed together at runtime.
@@ -312,3 +264,37 @@ Theres nothing in this example that prevents an error in an MFE from bubbling up
 
 **Shared CSS**
 Ideally, your teams will have a shared CSS/Component library. This will help the overall user experience. In cases where a MFE needs its own custom css, make sure it wont conflict with the container, or other MFEs. And make sure the design of your MFE doesnt conflict with the container. No absolute positioning!
+
+## Running the Example
+
+This repo contains two apps: `mfe-component` (the MFE) and `mfe-container` (the shell that loads it).
+
+### 1. Install dependencies
+
+```bash
+cd mfe-component && npm install
+cd ../mfe-container && npm install
+```
+
+### 2. Build and serve the MFE
+
+The container loads the MFE from its built output, so you need to build it first and run the preview server:
+
+```bash
+cd mfe-component
+npm run build
+npm run preview   # serves on http://localhost:4173
+```
+
+### 3. Start the container
+
+In a separate terminal:
+
+```bash
+cd mfe-container
+npm run dev   # serves on http://localhost:5174
+```
+
+Open [http://localhost:5174](http://localhost:5174). You should see the container shell with the MFE card grid loaded inside it.
+
+> **Rebuilding the MFE:** If you change the MFE's source, re-run `npm run build` in `mfe-component` and hard-refresh the container. The container always loads from the built output, not the dev server.
