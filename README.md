@@ -251,7 +251,38 @@ Run both apps, and you should see your MFE rendering inside the container.
 
 This approach is quick and practical, but go in with eyes open:
 
-**Bundle bloat.** Both the container and each MFE ship their own copy of React. That's extra kilobytes your users download before they see anything. The more MFEs you add, the worse this gets. To address it, you can configure Vite to externalize React and load it from a shared CDN, or use Webpack Module Federation which has built-in support for shared dependencies.
+**Bundle bloat.** Without any extra configuration, every MFE bundles its own copy of React. That's extra kilobytes your users download before they see anything — and the more MFEs you add, the worse it gets.
+
+The fix used in this example is to externalize React from the MFE build and load it from a shared CDN via an [import map](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap). Add the import map to both `index.html` files:
+
+```html
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.2.6",
+    "react-dom": "https://esm.sh/react-dom@19.2.6",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.6/client",
+    "react/jsx-runtime": "https://esm.sh/react@19.2.6/jsx-runtime",
+    "react/jsx-dev-runtime": "https://esm.sh/react@19.2.6/jsx-dev-runtime"
+  }
+}
+</script>
+```
+
+Then tell the MFE's build not to bundle React:
+
+```js
+// mfe-component/vite.config.js
+build: {
+  rollupOptions: {
+    external: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+  },
+}
+```
+
+With this in place, the MFE's built output leaves React as bare `import` specifiers. When the container dynamically imports the MFE, the browser resolves those specifiers using the container page's import map — so both apps load React from the same CDN URL. In this example, that drops the MFE bundle from ~260 kB to under 2 kB.
+
+One nuance: Vite's dev server rewrites bare module imports before the browser sees them, so import maps don't apply during local development. The container continues to use its Vite-managed React in dev mode; the shared CDN React only kicks in for the built MFE loaded in production (or via `vite preview`). Since the container and MFE create separate React roots and never share hooks or context across the boundary, this mixed state in dev is fine in practice.
 
 **Routing.** If your MFE has its own internal routes (e.g., using React Router), those can conflict with the container's router. A common pattern is to give each MFE a path prefix (`/your-app/*`) and have the container's router handle top-level navigation while passing the sub-path down to the MFE.
 
