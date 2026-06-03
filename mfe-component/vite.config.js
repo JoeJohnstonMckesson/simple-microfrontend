@@ -14,5 +14,8 @@ export default defineConfig({
       fileName: () => 'main.js',
     },
     manifest: true,
+    rollupOptions: {
+      external: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+    },
   },
 })
