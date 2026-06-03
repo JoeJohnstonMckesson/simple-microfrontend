@@ -251,7 +251,14 @@ export function MFERenderer({ mfeManifestUrl, appState }) {
 A few things happening here:
 
 - The first `useEffect` runs once on mount. It fetches the manifest, injects stylesheets, dynamically imports the JS module, and calls `init` + `update`.
-- The second `useEffect` runs whenever `appState` changes, keeping the MFE in sync with the container.
+- The second `useEffect` runs whenever `appState` changes, keeping the MFE in sync with the container. Note, you may not have to pass in any app state, or the MFERenderer component may get re-rendered without a change to that app state. In such cases, it may make more sense to trigger that effect on ANY change ex:
+```javascript
+  // Re-render the MFE whenever this component renders
+  useEffect(() => {
+    mfeModule.current?.update(appState);
+  });
+```
+Note, we've removed the dependency array for the effect, meaning this could get triggered A LOT. In this case you may also need to memoize the MFERenderer component.
 - The cleanup function in the first effect calls `unmount` when `MFERenderer` is removed from the DOM.
 - **CSS injection:** The manifest lists every output file, including stylesheets. We iterate over them and inject a `<link>` tag for each `.css` file. Without this step, the MFE renders with no styles.
 
