@@ -141,7 +141,7 @@ Two things are happening here that aren't obvious:
 - **`build.lib` instead of `rollupOptions.input`:** Using `rollupOptions.input` alone produces an IIFE bundle — it executes immediately and exports nothing. `build.lib` with `formats: ['es']` is what produces a proper ES module with your `init`, `update`, and `unmount` exports intact.
 - **`define: { "process.env.NODE_ENV": '"production"' }`:** In lib mode, Vite doesn't automatically replace Node.js globals. React checks `process.env.NODE_ENV` at runtime, so without this the bundle will throw a `process is not defined` error in the browser.
 
-Note: you ~can~ get away witout using the lib option. You just have to trick vite into building the app. You can do this by keeping the script tag in your index.html. Its a bit hacky, but it works.
+Note: you *can* get away witout using the lib option. You just have to trick vite into building the app. You can do this by keeping the script tag in your index.html. Its a bit hacky, but it works.
 
 ### Step 2: Export the Lifecycle Functions
 
