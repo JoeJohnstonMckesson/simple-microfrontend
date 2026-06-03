@@ -4,7 +4,7 @@
 
 A micro-frontend is an architectural pattern for integrating separate UI applications into one cohesive experience. It's the frontend equivalent of the microservices pattern on the backend — each piece of the UI is developed, deployed, and owned independently, then composed together at runtime.
 
-It's worth noting: "micro-frontend" describes the _pattern_, not a specific implementation. There are many ways to achieve it — iframes, Web Components, module federation, and more. This article covers a lightweight, DIY approach using native ES module imports. If you want a deeper dive into the broader landscape of MFEs, [Martin Fowler's 2019 post](https://martinfowler.com/articles/micro-frontends.html) is still the best starting point.
+It's worth noting: "micro-frontend" describes the _pattern_, not a specific implementation. There are many ways to achieve it — iframes, Web Components, module federation, and more. This covers a lightweight, DIY approach using native ES module imports. If you want a deeper dive into the broader landscape of MFEs, [Martin Fowler's 2019 post](https://martinfowler.com/articles/micro-frontends.html) is still the best starting point.
 
 ---
 
