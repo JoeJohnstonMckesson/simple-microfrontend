@@ -8,7 +8,10 @@ It's worth noting: "micro-frontend" describes the _pattern_, not a specific impl
 
 ## Running the Example
 
-This repo contains two apps: `mfe-component` (the MFE) and `mfe-container` (the shell that loads it).
+This repo contains two apps: `mfe-component` (the MFE) and `mfe-container` (the shell that loads it). The container has a top nav bar, and the MFE renders blocks of lorem ipsum text.
+
+<img width="912" height="669" alt="Screenshot 2026-06-03 at 9 28 43 AM" src="https://github.com/user-attachments/assets/906b1d59-e7f0-45cc-9ed3-3fd9a9dd199c" />
+
 
 ### 1. Install dependencies
 
@@ -296,7 +299,7 @@ Run both apps, and you should see your MFE rendering inside the container.
 
 This approach is quick and practical, but go in with eyes open:
 
-**Bundle bloat.** Without any extra configuration, every MFE bundles its own copy of React. That's extra kilobytes your users download before they see anything — and the more MFEs you add, the worse it gets.
+**Bundle bloat.** The container and MFE(s) may end up using the same libraries (lodash, tanstack, moment, etc...). That's extra kilobytes your users download before they see anything — and the more MFEs you add, the worse it gets. This is especially true to core libraries like React.
 
 The fix used in this example is to externalize React from the MFE build and load it from a shared CDN via an [import map](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap). Add the import map to both `index.html` files:
 
