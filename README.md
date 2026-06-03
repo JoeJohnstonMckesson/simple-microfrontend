@@ -6,7 +6,40 @@ A micro-frontend is an architectural pattern for integrating separate UI applica
 
 It's worth noting: "micro-frontend" describes the _pattern_, not a specific implementation. There are many ways to achieve it — iframes, Web Components, module federation, and more. This covers a lightweight, DIY approach using native ES module imports. If you want a deeper dive into the broader landscape of MFEs, [Martin Fowler's 2019 post](https://martinfowler.com/articles/micro-frontends.html) is still the best starting point.
 
----
+## Running the Example
+
+This repo contains two apps: `mfe-component` (the MFE) and `mfe-container` (the shell that loads it).
+
+### 1. Install dependencies
+
+```bash
+cd mfe-component && npm install
+cd ../mfe-container && npm install
+```
+
+### 2. Build and serve the MFE
+
+The container loads the MFE from its built output, so you need to build it first and run the preview server:
+
+```bash
+cd mfe-component
+npm run build
+npm run preview   # serves on http://localhost:4173
+```
+
+### 3. Start the container
+
+In a separate terminal:
+
+```bash
+cd mfe-container
+npm run dev   # serves on http://localhost:5174
+```
+
+Open [http://localhost:5174](http://localhost:5174). You should see the container shell with the MFE card grid loaded inside it.
+
+> **Rebuilding the MFE:** If you change the MFE's source, re-run `npm run build` in `mfe-component` and hard-refresh the container. The container always loads from the built output, not the dev server.
+
 
 ## Pros and Cons
 
@@ -25,7 +58,7 @@ Before diving in, it's worth being honest about the trade-offs.
 - Potential for duplicated dependencies (e.g., two copies of React being loaded).
 - Harder to debug issues that span the container and an MFE.
 
-If your app is small or your team is a single squad, MFEs may be more overhead than they're worth. But if you're in the situation described above — one team's app needs to live inside another team's product — this is a clean solution.
+If your app is small or your team is a single squad, MFEs may be more overhead than they're worth. But if you're in a situation where, say — one team's app needs to live inside another team's product — this solution will get you there without needing to re-write your entire app.
 
 ---
 
@@ -58,7 +91,8 @@ If you're using an established MFE framework (like [single-spa](https://single-s
 - Both the container and the MFE are React apps (Vite + React v19).
 - Each app is hosted separately (different origins or paths).
 - The browser supports native ES module `import`/`export`. No IE support — sorry.
-- You can mix and match frameworks in a real setup; this example keeps both sides in React for simplicity.
+
+Also, In this example keeps both the container and the MFE are simple react apps. But in reality you can use whatever frameworks you want. You can mix and match them to your hearts content.
 
 ---
 
@@ -72,7 +106,7 @@ const root = ReactDOM.createRoot(domElm);
 root.render(<App />);
 ```
 
-This is doing three things: finding a DOM node, creating a React root attached to it, and rendering your app. Those three steps map directly to our three lifecycle methods.
+This is doing three things: finding a DOM node, creating a React root attached to it, and rendering your app. Those three steps map directly to two of our three lifecycle methods. We'll cover the `unmount` method soon.
 
 ---
 
@@ -106,6 +140,8 @@ Two things are happening here that aren't obvious:
 
 - **`build.lib` instead of `rollupOptions.input`:** Using `rollupOptions.input` alone produces an IIFE bundle — it executes immediately and exports nothing. `build.lib` with `formats: ['es']` is what produces a proper ES module with your `init`, `update`, and `unmount` exports intact.
 - **`define: { "process.env.NODE_ENV": '"production"' }`:** In lib mode, Vite doesn't automatically replace Node.js globals. React checks `process.env.NODE_ENV` at runtime, so without this the bundle will throw a `process is not defined` error in the browser.
+
+Note: you ~can~ get away witout using the lib option. You just have to trick vite into building the app. You can do this by keeping the script tag in your index.html. Its a bit hacky, but it works.
 
 ### Step 2: Export the Lifecycle Functions
 
@@ -215,9 +251,11 @@ export function MFERenderer({ mfeManifestUrl, appState }) {
 A few things happening here:
 
 - The first `useEffect` runs once on mount. It fetches the manifest, injects stylesheets, dynamically imports the JS module, and calls `init` + `update`.
-- **CSS injection:** The manifest lists every output file, including stylesheets. We iterate over them and inject a `<link>` tag for each `.css` file. Without this step, the MFE renders with no styles.
 - The second `useEffect` runs whenever `appState` changes, keeping the MFE in sync with the container.
 - The cleanup function in the first effect calls `unmount` when `MFERenderer` is removed from the DOM.
+- **CSS injection:** The manifest lists every output file, including stylesheets. We iterate over them and inject a `<link>` tag for each `.css` file. Without this step, the MFE renders with no styles.
+
+Note: this works well for this simple example, but more complex react apps (especially those with dynamic imports) will have a LOT more css imports. In those cases, you only need to import the css associated with your index.jsx file, not EVERY css file for your app. 
 
 Then, drop `MFERenderer` into your container's `App.jsx`:
 
@@ -295,37 +333,3 @@ Theres nothing in this example that prevents an error in an MFE from bubbling up
 
 **Shared CSS**
 Ideally, your teams will have a shared CSS/Component library. This will help the overall user experience. In cases where a MFE needs its own custom css, make sure it wont conflict with the container, or other MFEs. And make sure the design of your MFE doesnt conflict with the container. No absolute positioning!
-
-## Running the Example
-
-This repo contains two apps: `mfe-component` (the MFE) and `mfe-container` (the shell that loads it).
-
-### 1. Install dependencies
-
-```bash
-cd mfe-component && npm install
-cd ../mfe-container && npm install
-```
-
-### 2. Build and serve the MFE
-
-The container loads the MFE from its built output, so you need to build it first and run the preview server:
-
-```bash
-cd mfe-component
-npm run build
-npm run preview   # serves on http://localhost:4173
-```
-
-### 3. Start the container
-
-In a separate terminal:
-
-```bash
-cd mfe-container
-npm run dev   # serves on http://localhost:5174
-```
-
-Open [http://localhost:5174](http://localhost:5174). You should see the container shell with the MFE card grid loaded inside it.
-
-> **Rebuilding the MFE:** If you change the MFE's source, re-run `npm run build` in `mfe-component` and hard-refresh the container. The container always loads from the built output, not the dev server.
